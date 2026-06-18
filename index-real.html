@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Trends Monitor - Datos REALES actualizados cada hora por GitHub Actions">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Trends Monitor">
+    <link rel="manifest" href="manifest.json">
+    <title>🔥 Trends Monitor - DATOS REALES</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --danger: #d33c27;
+            --success: #188038;
+            --warning: #f57c00;
+            --bg: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text: #202124;
+            --text-secondary: #5f6368;
+            --border: #dadce0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text);
+            overflow-x: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #0d47a1 100%);
+            color: white;
+            padding: 16px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .app-header h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .app-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 12px;
+            padding-bottom: 100px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .metric-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .trends-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .trend-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.2s;
+        }
+
+        .trend-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .trend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .trend-category {
+            display: inline-block;
+            background: var(--warning);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .trend-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 8px 0;
+        }
+
+        .trend-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .viralidad-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .viralidad-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--warning));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .viralidad-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .trend-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .stat {
+            background: var(--bg-secondary);
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .trend-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 10px;
+        }
+
+        .badge {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--text-secondary);
+        }
+
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .source-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 99;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .update-banner {
+            background: var(--success);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .data-source {
+            background: var(--bg-secondary);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .real-data-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .trends-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analytics-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1>
+            <span class="status-dot"></span>
+            🔥 Trends Monitor REAL
+        </h1>
+        <p>Datos actualizados cada hora por GitHub Actions</p>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="recargarDatos()">🔄 Recargar AHORA</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="real-data-badge">✅ Datos REALES actualizados cada hora</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('resumen', this)">📊 Resumen</button>
+            <button class="tab-btn" onclick="switchTab('todos', this)">🔥 Todos</button>
+            <button class="tab-btn" onclick="switchTab('restaurantes', this)">🍽️</button>
+            <button class="tab-btn" onclick="switchTab('bares', this)">🍹</button>
+            <button class="tab-btn" onclick="switchTab('cafeterias', this)">☕</button>
+            <button class="tab-btn" onclick="switchTab('reposteria', this)">🍰</button>
+        </div>
+
+        <!-- RESUMEN -->
+        <div id="resumen" class="tab-content active">
+            <div class="analytics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">📊 Total trends</div>
+                    <div class="metric-value" id="totalTrends">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">🔥 Más viral</div>
+                    <div class="metric-value" id="trendMasViral" style="font-size: 14px;">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">⚡ Promedio</div>
+                    <div class="metric-value" id="promedio">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">🕐 Actualizado</div>
+                    <div class="metric-value" id="lastUpdate" style="font-size: 12px;">-</div>
+                </div>
+            </div>
+
+            <h2 style="font-size: 14px; margin: 16px 0 8px; color: var(--text);">🔥 Top Trends AHORA</h2>
+            <div id="topTrends" class="trends-container"></div>
+
+            <div class="data-source" id="dataSource"></div>
+        </div>
+
+        <!-- TODOS -->
+        <div id="todos" class="tab-content">
+            <div id="allTrends" class="trends-container"></div>
+        </div>
+
+        <!-- CATEGORÍAS -->
+        <div id="restaurantes" class="tab-content">
+            <div id="trendsRestaurantes" class="trends-container"></div>
+        </div>
+
+        <div id="bares" class="tab-content">
+            <div id="trendsBares" class="trends-container"></div>
+        </div>
+
+        <div id="cafeterias" class="tab-content">
+            <div id="trendsCafeterias" class="trends-container"></div>
+        </div>
+
+        <div id="reposteria" class="tab-content">
+            <div id="trendsReposteria" class="trends-container"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTabNav('resumen')">📊</button>
+        <button class="nav-btn" onclick="switchTabNav('todos')">🔥</button>
+        <button class="nav-btn" onclick="switchTabNav('restaurantes')">🍽️</button>
+        <button class="nav-btn" onclick="switchTabNav('bares')">🍹</button>
+        <button class="nav-btn" onclick="switchTabNav('cafeterias')">☕</button>
+        <button class="nav-btn" onclick="switchTabNav('reposteria')">🍰</button>
+    </div>
+
+    <script>
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(e => console.log('SW:', e));
+        }
+
+        let allTrends = [];
+        let datosOriginales = {};
+
+        // Cargar datos al iniciar
+        async function cargarDatos() {
+            try {
+                const response = await fetch('trends-data.json');
+                datosOriginales = await response.json();
+                allTrends = datosOriginales.trends || [];
+                
+                console.log('✅ Datos cargados:', allTrends.length, 'trends');
+                renderizar();
+            } catch (error) {
+                console.error('❌ Error cargando datos:', error);
+                document.getElementById('resumen').innerHTML = `
+                    <div class="no-data">
+                        <p>⚠️ Error cargando datos</p>
+                        <p style="font-size: 12px; margin-top: 10px;">Verifica que trends-data.json esté en la carpeta raíz</p>
+                        <button onclick="recargarDatos()" style="margin-top: 10px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Reintentar</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Recargar datos
+        async function recargarDatos() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Recargando...';
+
+            // Agregar parámetro para evitar caché
+            try {
+                const response = await fetch('trends-data.json?' + new Date().getTime());
+                datosOriginales = await response.json();
+                allTrends = datosOriginales.trends || [];
+                renderizar();
+
+                btn.textContent = '✅ Actualizado';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Recargar AHORA';
+                }, 2000);
+            } catch (error) {
+                console.error('Error:', error);
+                btn.disabled = false;
+                btn.textContent = '❌ Error';
+            }
+        }
+
+        // Crear card de trend
+        function crearTrendCard(trend) {
+            const viralidad = Math.round(trend.viralidad * 10) / 10;
+            const source = trend.source || 'Unknown';
+            
+            return `
+                <div class="trend-card">
+                    <div class="trend-header">
+                        <div class="trend-category">${trend.categoria}</div>
+                        <div style="display: flex; gap: 4px;">
+                            <span class="source-badge">${source.substring(0, 10)}</span>
+                            <div class="badge live-badge">LIVE</div>
+                        </div>
+                    </div>
+                    <div class="trend-name">${trend.nombre}</div>
+                    <div class="trend-desc">${trend.descripcion}</div>
+                    
+                    <div class="viralidad-label">
+                        <span>Viralidad</span>
+                        <span style="font-weight: 600;">${viralidad}%</span>
+                    </div>
+                    <div class="viralidad-bar">
+                        <div class="viralidad-fill" style="width: ${viralidad}%"></div>
+                    </div>
+                    
+                    <div class="trend-stats">
+                        <div class="stat">
+                            <div style="font-size: 10px; color: var(--text-secondary);">Menciones</div>
+                            <div class="stat-value">${trend.menciones.toLocaleString()}</div>
+                        </div>
+                        <div class="stat">
+                            <div style="font-size: 10px; color: var(--text-secondary);">Videos</div>
+                            <div class="stat-value">${trend.videos.toLocaleString()}</div>
+                        </div>
+                        <div class="stat">
+                            <div style="font-size: 10px; color: var(--text-secondary);">Tendencia</div>
+                            <div class="stat-value">📈</div>
+                        </div>
+                    </div>
+                    
+                    <div class="trend-info">
+                        <div class="badge">${trend.formato}</div>
+                        <div class="badge">${trend.sonido}</div>
+                        <div class="badge">${trend.hashtags}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar UI
+        function renderizar() {
+            if (!allTrends || allTrends.length === 0) {
+                document.getElementById('resumen').innerHTML = `
+                    <div class="no-data">
+                        <p>⏳ Cargando trends...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Métricas
+            document.getElementById('totalTrends').textContent = allTrends.length;
+            document.getElementById('trendMasViral').textContent = allTrends[0].nombre.substring(0, 20) + '...';
+            document.getElementById('promedio').textContent = datosOriginales.promedio_viralidad + '%';
+            document.getElementById('lastUpdate').textContent = datosOriginales.última_actualización.split(' ')[1] || '-';
+
+            // Top 3
+            const top3 = allTrends.slice(0, 3).map(t => crearTrendCard(t)).join('');
+            document.getElementById('topTrends').innerHTML = top3;
+
+            // Data source
+            const sources = datosOriginales.fuentes ? datosOriginales.fuentes.join(' • ') : 'Unknown';
+            document.getElementById('dataSource').innerHTML = `
+                📡 Datos de: ${sources}<br>
+                🕐 Actualizado: ${datosOriginales.última_actualización}
+            `;
+
+            // Todos
+            const todos = allTrends.map(t => crearTrendCard(t)).join('');
+            document.getElementById('allTrends').innerHTML = todos;
+
+            // Por categoría
+            ['Restaurantes', 'Bares', 'Cafeterías', 'Repostería'].forEach(cat => {
+                const trends = allTrends.filter(t => t.categoria === cat);
+                const html = trends.length > 0 
+                    ? trends.map(t => crearTrendCard(t)).join('')
+                    : '<div class="no-data">No hay trends</div>';
+                document.getElementById('trends' + cat).innerHTML = html;
+            });
+        }
+
+        // Switch tab
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function switchTabNav(tabId) {
+            switchTab(tabId, document.querySelector(`[onclick="switchTab('${tabId}']`));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Iniciar
+        window.addEventListener('load', cargarDatos);
+
+        // Auto-reload cada 60 minutos
+        setInterval(cargarDatos, 3600000);
+    </script>
+</body>
+</html>
