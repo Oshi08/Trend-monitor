@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-06-19T14:30:00",
+  "última_actualización": "2026-06-19 14:30:00",
+  "trends": [
+    {
+      "nombre": "ASMR bebidas + hielo",
+      "categoria": "Bares",
+      "descripcion": "Hielo cayendo con sonido puro",
+      "viralidad": 97,
+      "formato": "Reel 5-10s",
+      "sonido": "Natural",
+      "hashtags": "#ASMR",
+      "menciones": 6800,
+      "videos": 3200,
+      "source": "TikTok"
+    },
+    {
+      "nombre": "Postres brutales",
+      "categoria": "Repostería",
+      "descripcion": "Pasteles quemados y desordenados",
+      "viralidad": 96,
+      "formato": "Reel 8-15s",
+      "sonido": "Transiciones",
+      "hashtags": "#PostreBrutal",
+      "menciones": 5400,
+      "videos": 2670,
+      "source": "TikTok"
+    },
+    {
+      "nombre": "Corte de carne slow-motion",
+      "categoria": "Restaurantes",
+      "descripcion": "Corte perfecto mostrando jugo",
+      "viralidad": 92,
+      "formato": "Reel 8-15s",
+      "sonido": "ASMR",
+      "hashtags": "#Food",
+      "menciones": 4200,
+      "videos": 1850,
+      "source": "Google"
+    }
+  ],
+  "total": 3,
+  "promedio_viralidad": 95,
+  "trend_más_viral": "ASMR bebidas + hielo",
+  "fuentes": ["TikTok", "Google"]
+}
