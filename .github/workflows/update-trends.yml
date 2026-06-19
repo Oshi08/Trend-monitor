@@ -1,4 +1,4 @@
-name: 🔄 Actualizar Trends cada hora
+name: 🔄 Actualizar Trends REALES cada hora
 
 on:
   schedule:
@@ -15,48 +15,37 @@ jobs:
     steps:
       - name: 📥 Descargar repositorio
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Python info
+      - name: 🐍 Instalar Python y librerías
         run: |
-          python3 --version
-          pwd
-          ls -la
+          python3 -m pip install --upgrade pip
+          pip install pytrends requests beautifulsoup4 lxml
+          echo "✅ Librerías instaladas"
 
-      - name: 🔥 Ejecutar script de trends
+      - name: 🔥 Obtener trends REALES
         run: |
           cd $GITHUB_WORKSPACE
           python3 scripts/get_trends.py
 
-      - name: 📋 Verificar archivo creado
+      - name: 📋 Verificar datos
         run: |
           if [ -f trends-data.json ]; then
-            echo "✅ Archivo existe"
-            ls -lh trends-data.json
-            head -c 200 trends-data.json
+            echo "✅ Archivo creado correctamente"
+            python3 -c "import json; d=json.load(open('trends-data.json')); print(f'Total: {d[\"total\"]} trends'); print(f'Tipo: {d[\"tipo\"]}'); print(f'Fuentes: {d[\"fuentes']}')"
           else
             echo "❌ ERROR: archivo no encontrado"
             exit 1
           fi
 
-      - name: 💾 Configurar Git
+      - name: 💾 Guardar cambios
         run: |
           git config --global user.name "Trends Bot"
           git config --global user.email "trends-bot@github.com"
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: 📤 Agregar y hacer commit
-        run: |
-          cd $GITHUB_WORKSPACE
           git add trends-data.json
-          git status
-          git commit -m "🔄 Actualizar trends - $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios"
-
-      - name: 🚀 Push a GitHub
-        run: |
-          cd $GITHUB_WORKSPACE
-          git push origin main || echo "No hay cambios para pushear"
+          git commit -m "🔄 Actualizar trends REALES - $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios"
+          git push origin main || echo "No hay cambios"
 
       - name: ✅ Completado
-        run: echo "✅ Trends actualizados exitosamente - $(date)"
+        run: |
+          echo "✅ Trends actualizados exitosamente"
+          date
