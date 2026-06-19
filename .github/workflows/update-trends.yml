@@ -15,20 +15,48 @@ jobs:
     steps:
       - name: 📥 Descargar repositorio
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Python disponible
-        run: python3 --version
+      - name: 🐍 Python info
+        run: |
+          python3 --version
+          pwd
+          ls -la
 
       - name: 🔥 Ejecutar script de trends
-        run: python3 scripts/get_trends.py
-
-      - name: 💾 Guardar cambios en Git
         run: |
-          git config user.name "Trends Bot"
-          git config user.email "trends-bot@github.com"
+          cd $GITHUB_WORKSPACE
+          python3 scripts/get_trends.py
+
+      - name: 📋 Verificar archivo creado
+        run: |
+          if [ -f trends-data.json ]; then
+            echo "✅ Archivo existe"
+            ls -lh trends-data.json
+            head -c 200 trends-data.json
+          else
+            echo "❌ ERROR: archivo no encontrado"
+            exit 1
+          fi
+
+      - name: 💾 Configurar Git
+        run: |
+          git config --global user.name "Trends Bot"
+          git config --global user.email "trends-bot@github.com"
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: 📤 Agregar y hacer commit
+        run: |
+          cd $GITHUB_WORKSPACE
           git add trends-data.json
+          git status
           git commit -m "🔄 Actualizar trends - $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios"
-          git push origin main || echo "Sin cambios para pushear"
+
+      - name: 🚀 Push a GitHub
+        run: |
+          cd $GITHUB_WORKSPACE
+          git push origin main || echo "No hay cambios para pushear"
 
       - name: ✅ Completado
-        run: echo "✅ Trends actualizados exitosamente"
+        run: echo "✅ Trends actualizados exitosamente - $(date)"
