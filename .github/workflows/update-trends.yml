@@ -14,34 +14,15 @@ jobs:
     
     steps:
       - name: 📥 Descargar repositorio
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v2
 
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: 🐍 Python disponible
+        run: python3 --version
 
-      - name: 📦 Instalar dependencias
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
+      - name: 🔥 Ejecutar script de trends
+        run: python3 scripts/get_trends.py
 
-      - name: 🔥 Obtener trends reales
-        run: python scripts/get_trends.py
-
-      - name: ✅ Verificar archivo de datos
-        run: |
-          if [ -f trends-data.json ]; then
-            echo "✅ Archivo trends-data.json creado correctamente"
-            cat trends-data.json
-          else
-            echo "❌ Error: archivo no encontrado"
-            exit 1
-          fi
-
-      - name: 💾 Guardar cambios
+      - name: 💾 Guardar cambios en Git
         run: |
           git config user.name "Trends Bot"
           git config user.email "trends-bot@github.com"
@@ -49,5 +30,5 @@ jobs:
           git commit -m "🔄 Actualizar trends - $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios"
           git push origin main || echo "Sin cambios para pushear"
 
-      - name: 🎉 Éxito
+      - name: ✅ Completado
         run: echo "✅ Trends actualizados exitosamente"
