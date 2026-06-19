@@ -1,4 +1,4 @@
-name: 🔥 Obtener Trends REALES de Internet (Reddit + Twitter + Todo)
+name: 🔥 Obtener Trends REALES de Internet
 
 on:
   schedule:
@@ -11,10 +11,14 @@ on:
 jobs:
   update-trends:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: 📥 Descargar repositorio
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Instalar librerías
         run: |
@@ -22,43 +26,38 @@ jobs:
           pip install praw tweepy requests beautifulsoup4 lxml
           echo "✅ Librerías instaladas"
 
-      - name: 🔥 BUSCAR TRENDS REALES DE INTERNET
+      - name: 🔥 BUSCAR TRENDS REALES
         run: |
           echo "======================================"
           echo "🔥 OBTENIENDO DATOS REALES DE:"
-          echo "📱 Reddit"
-          echo "🐦 Twitter"
-          echo "📹 TikTok"
-          echo "🌐 Web"
+          echo "📱 Reddit, 🐦 Twitter, 📹 TikTok, 🌐 Web"
           echo "======================================"
-          cd $GITHUB_WORKSPACE
           python3 scripts/get_trends.py
 
       - name: ✅ Verificar archivo
         run: |
           if [ -f trends-data.json ]; then
-            echo "✅ Archivo creado: $(ls -lh trends-data.json | awk '{print $5}')"
-            cat trends-data.json | head -c 500
-            echo ""
-            echo "---"
-            echo "✅ Trends guardados correctamente"
+            echo "✅ Archivo creado correctamente"
+            wc -l trends-data.json
           else
             echo "❌ ERROR"
             exit 1
           fi
 
-      - name: 💾 Guardar en GitHub
+      - name: 💾 Configurar Git
         run: |
-          git config --global user.name "Trends Bot"
-          git config --global user.email "trends-bot@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 📤 Commit y Push
+        run: |
           git add trends-data.json
-          git commit -m "🔥 Trends REALES - Reddit+Twitter+Web - $(date +'%Y-%m-%d %H:%M:%S')" || echo "Sin cambios"
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "Sin cambios"
+          else
+            git commit -m "🔥 Trends REALES - $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            git push origin main
+          fi
 
       - name: ✅ Completado
-        run: |
-          echo "========================================="
-          echo "✅ TRENDS ACTUALIZADOS DESDE INTERNET"
-          echo "📊 Fuente: Reddit + Twitter + TikTok + Web"
-          echo "⏰ Hora: $(date)"
-          echo "========================================="
+        run: echo "✅ Trends actualizados - $(date)"
