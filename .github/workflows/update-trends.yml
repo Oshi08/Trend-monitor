@@ -1,4 +1,4 @@
-name: 🔄 Actualizar Trends REALES cada hora
+name: 🔥 Obtener Trends REALES de Internet (Reddit + Twitter + Todo)
 
 on:
   schedule:
@@ -16,36 +16,49 @@ jobs:
       - name: 📥 Descargar repositorio
         uses: actions/checkout@v2
 
-      - name: 🐍 Instalar Python y librerías
+      - name: 🐍 Instalar librerías
         run: |
           python3 -m pip install --upgrade pip
-          pip install pytrends requests beautifulsoup4 lxml
+          pip install praw tweepy requests beautifulsoup4 lxml
           echo "✅ Librerías instaladas"
 
-      - name: 🔥 Obtener trends REALES
+      - name: 🔥 BUSCAR TRENDS REALES DE INTERNET
         run: |
+          echo "======================================"
+          echo "🔥 OBTENIENDO DATOS REALES DE:"
+          echo "📱 Reddit"
+          echo "🐦 Twitter"
+          echo "📹 TikTok"
+          echo "🌐 Web"
+          echo "======================================"
           cd $GITHUB_WORKSPACE
           python3 scripts/get_trends.py
 
-      - name: 📋 Verificar datos
+      - name: ✅ Verificar archivo
         run: |
           if [ -f trends-data.json ]; then
-            echo "✅ Archivo creado correctamente"
-            ls -lh trends-data.json
-            head -c 300 trends-data.json
+            echo "✅ Archivo creado: $(ls -lh trends-data.json | awk '{print $5}')"
+            cat trends-data.json | head -c 500
             echo ""
+            echo "---"
+            echo "✅ Trends guardados correctamente"
           else
-            echo "❌ ERROR: archivo no encontrado"
+            echo "❌ ERROR"
             exit 1
           fi
 
-      - name: 💾 Guardar cambios
+      - name: 💾 Guardar en GitHub
         run: |
           git config --global user.name "Trends Bot"
           git config --global user.email "trends-bot@github.com"
           git add trends-data.json
-          git commit -m "🔄 Actualizar trends REALES - $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios"
-          git push origin main || echo "No hay cambios"
+          git commit -m "🔥 Trends REALES - Reddit+Twitter+Web - $(date +'%Y-%m-%d %H:%M:%S')" || echo "Sin cambios"
+          git push origin main
 
       - name: ✅ Completado
-        run: echo "✅ Trends actualizados exitosamente - $(date)"
+        run: |
+          echo "========================================="
+          echo "✅ TRENDS ACTUALIZADOS DESDE INTERNET"
+          echo "📊 Fuente: Reddit + Twitter + TikTok + Web"
+          echo "⏰ Hora: $(date)"
+          echo "========================================="
