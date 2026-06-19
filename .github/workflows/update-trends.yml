@@ -1,4 +1,4 @@
-name: 🔥 Obtener Trends REALES de Internet
+name: 🔥 DATOS REALES DE INTERNET EN DIRECTO
 
 on:
   schedule:
@@ -15,49 +15,57 @@ jobs:
       contents: write
     
     steps:
-      - name: 📥 Descargar repositorio
+      - name: 📥 Clonar repositorio
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Instalar librerías
+      - name: 🐍 Instalar dependencias
         run: |
           python3 -m pip install --upgrade pip
-          pip install praw tweepy requests beautifulsoup4 lxml
-          echo "✅ Librerías instaladas"
+          pip install requests beautifulsoup4 lxml
+          echo "✅ Dependencias listas"
 
-      - name: 🔥 BUSCAR TRENDS REALES
+      - name: 🔥 OBTENER DATOS REALES EN DIRECTO
         run: |
-          echo "======================================"
-          echo "🔥 OBTENIENDO DATOS REALES DE:"
-          echo "📱 Reddit, 🐦 Twitter, 📹 TikTok, 🌐 Web"
-          echo "======================================"
+          echo "========================================="
+          echo "🔥 SCRAPING EN DIRECTO:"
+          echo "📱 Reddit - Posts trending REALES"
+          echo "🔍 Google Trends - Búsquedas en tendencia"
+          echo "📹 TikTok - Hashtags virales"
+          echo "========================================="
           python3 scripts/get_trends.py
+          echo "========================================="
 
-      - name: ✅ Verificar archivo
+      - name: ✅ Verificar datos
         run: |
           if [ -f trends-data.json ]; then
-            echo "✅ Archivo creado correctamente"
+            echo "✅ JSON creado correctamente"
             wc -l trends-data.json
           else
-            echo "❌ ERROR"
+            echo "❌ ERROR: JSON no encontrado"
             exit 1
           fi
 
       - name: 💾 Configurar Git
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "TrendsBot"
+          git config user.email "bot@trends.local"
 
-      - name: 📤 Commit y Push
+      - name: 📤 Push a GitHub
         run: |
           git add trends-data.json
           if git diff --cached --quiet; then
             echo "Sin cambios"
           else
-            git commit -m "🔥 Trends REALES - $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            git commit -m "🔥 DATOS REALES EN DIRECTO - $(date +'%Y-%m-%d %H:%M:%S UTC')"
             git push origin main
           fi
 
       - name: ✅ Completado
-        run: echo "✅ Trends actualizados - $(date)"
+        run: |
+          echo "========================================="
+          echo "✅ TRENDS REALES ACTUALIZADOS"
+          echo "📊 Fuente: Reddit + Google + TikTok"
+          echo "⏰ $(date)"
+          echo "========================================="
