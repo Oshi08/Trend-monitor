@@ -31,7 +31,9 @@ jobs:
         run: |
           if [ -f trends-data.json ]; then
             echo "✅ Archivo creado correctamente"
-            python3 -c "import json; d=json.load(open('trends-data.json')); print(f'Total: {d[\"total\"]} trends'); print(f'Tipo: {d[\"tipo\"]}'); print(f'Fuentes: {d[\"fuentes']}')"
+            ls -lh trends-data.json
+            head -c 300 trends-data.json
+            echo ""
           else
             echo "❌ ERROR: archivo no encontrado"
             exit 1
@@ -46,6 +48,4 @@ jobs:
           git push origin main || echo "No hay cambios"
 
       - name: ✅ Completado
-        run: |
-          echo "✅ Trends actualizados exitosamente"
-          date
+        run: echo "✅ Trends actualizados exitosamente - $(date)"
